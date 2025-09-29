@@ -1,14 +1,16 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="text-h4 q-mb-lg">질의응답</div>
-
-    <div class="row" style="height: calc(100vh - 150px)">
+  <q-page class="q-pa-md" style="padding-bottom: 16px;">
+    <div class="row" style="height: calc(100vh - 136px);">
       <!-- Chat Messages Area -->
       <div class="col-12 col-sm-9 q-pr-md">
-        <q-card class="full-height">
-          <q-card-section class="q-pa-none full-height">
+        <q-card style="height: 100%; display: flex; flex-direction: column;">
+          <q-card-section class="q-pa-md q-pb-none">
+            <div class="text-h4">질의응답</div>
+          </q-card-section>
+
+          <q-card-section class="q-pa-none" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
             <!-- Messages Container -->
-            <div class="q-pa-md" style="height: calc(100% - 120px); overflow-y: auto;">
+            <div class="q-pa-md" style="flex: 1; overflow-y: auto; min-height: 0;">
               <div v-if="!chatStore.hasMessages" class="text-center q-mt-xl">
                 <q-icon name="chat" size="60px" color="grey-5" />
                 <div class="text-h6 q-mt-md text-grey-6">대화를 시작해보세요!</div>
@@ -146,7 +148,7 @@
 
       <!-- Session History Sidebar -->
       <div class="col-12 col-sm-3">
-        <q-card class="full-height">
+        <q-card style="height: 100%;">
           <q-card-section>
             <div class="row items-center q-mb-md">
               <div class="col">

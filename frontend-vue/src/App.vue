@@ -138,7 +138,7 @@
         </div>
         <q-space />
         <div class="text-caption text-grey-6">
-          Powered by Vue 3 + Quasar + Ollama
+          Powered by Vue 3 + Quasar + qwen2:0.5b
         </div>
       </q-toolbar>
     </q-footer>
