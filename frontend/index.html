@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>제조업 데이터시트 RAG 시스템</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-primary">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">
+                <i class="fas fa-microchip me-2"></i>
+                제조업 데이터시트 RAG 시스템
+            </span>
+            <div class="d-flex align-items-center">
+                <span id="systemStatus" class="badge bg-secondary me-2">상태 확인중...</span>
+                <button class="btn btn-outline-light btn-sm" onclick="checkSystemStatus()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- 시스템 상태 카드 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i>시스템 상태</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="statusCards">
+                            <!-- 동적으로 생성 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 파일 업로드 섹션 -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-upload me-2"></i>문서 업로드</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="uploadForm" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="fileInput" class="form-label">PDF 파일 선택</label>
+                                <input type="file" class="form-control" id="fileInput" accept=".pdf" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="documentType" class="form-label">문서 유형</label>
+                                <select class="form-select" id="documentType" required>
+                                    <option value="">선택하세요</option>
+                                    <option value="datasheet">데이터시트</option>
+                                    <option value="specification">기술사양서</option>
+                                    <option value="manual">매뉴얼</option>
+                                    <option value="catalog">카탈로그</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="productFamily" class="form-label">제품군</label>
+                                <input type="text" class="form-control" id="productFamily" placeholder="예: DDR5, SSD, NAND Flash">
+                            </div>
+                            <div class="mb-3">
+                                <label for="productModel" class="form-label">제품 모델</label>
+                                <input type="text" class="form-control" id="productModel" placeholder="예: RDIMM, eUFS">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-upload me-2"></i>업로드
+                            </button>
+                        </form>
+
+                        <div id="uploadProgress" class="mt-3" style="display: none;">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted">파일 업로드 중...</small>
+                        </div>
+
+                        <div id="uploadedFiles" class="mt-3">
+                            <h6>업로드된 문서</h6>
+                            <div id="fileList" class="list-group">
+                                <!-- 동적으로 생성 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 질의응답 섹션 -->
+            <div class="col-lg-8">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-comments me-2"></i>질의응답</h5>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <!-- 역할 선택 -->
+                        <div class="mb-3">
+                            <label class="form-label">사용자 역할</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="userRole" id="engineer" value="engineer" checked>
+                                <label class="btn btn-outline-primary" for="engineer">
+                                    <i class="fas fa-cogs me-1"></i>엔지니어
+                                </label>
+
+                                <input type="radio" class="btn-check" name="userRole" id="quality" value="quality">
+                                <label class="btn btn-outline-success" for="quality">
+                                    <i class="fas fa-check-circle me-1"></i>품질관리
+                                </label>
+
+                                <input type="radio" class="btn-check" name="userRole" id="sales" value="sales">
+                                <label class="btn btn-outline-info" for="sales">
+                                    <i class="fas fa-handshake me-1"></i>영업
+                                </label>
+
+                                <input type="radio" class="btn-check" name="userRole" id="support" value="support">
+                                <label class="btn btn-outline-warning" for="support">
+                                    <i class="fas fa-life-ring me-1"></i>고객지원
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 채팅 영역 -->
+                        <div id="chatMessages" class="flex-grow-1 mb-3 p-3 bg-light rounded" style="height: 400px; overflow-y: auto;">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-robot fa-2x mb-2"></i>
+                                <p>안녕하세요! 제조업 데이터시트에 대해 궁금한 것을 물어보세요.</p>
+                            </div>
+                        </div>
+
+                        <!-- 입력 영역 -->
+                        <div class="input-group">
+                            <input type="text" id="questionInput" class="form-control" placeholder="질문을 입력하세요..." onkeypress="handleKeyPress(event)">
+                            <button class="btn btn-primary" type="button" onclick="sendQuestion()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+
+                        <!-- 예시 질문들 -->
+                        <div class="mt-2">
+                            <small class="text-muted">예시 질문:</small>
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="setQuestion('DDR5의 동작 전압은?')">DDR5의 동작 전압은?</button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="setQuestion('메모리 용량 옵션은?')">메모리 용량 옵션은?</button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="setQuestion('온도 동작 범위는?')">온도 동작 범위는?</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 부트스트랩 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
